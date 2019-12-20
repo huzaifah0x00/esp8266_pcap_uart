@@ -46,7 +46,7 @@ void uart_init(void)
         .flow_ctrl = UART_HW_FLOWCTRL_DISABLE
     };
     uart_param_config(UART_NUM_0, &uart_config);
-    uart_driver_install(UART_NUM_0, CONFIG_SNIFFER_UART_BUFFER_SIZE, 0, 0, NULL);
+    uart_driver_install(UART_NUM_0, CONFIG_SNIFFER_UART_BUFFER_SIZE, 0, 0, NULL, 0 );
 }
 
 void app_main(void)
@@ -60,6 +60,7 @@ void app_main(void)
     wifi_init();
     gpio_set_direction(CONFIG_SNIFFER_LED_GPIO_PIN, GPIO_MODE_OUTPUT);
 
+    vTaskDelay( 2500 / portTICK_PERIOD_MS); // sleep 2.5 seconds before starting stream 
     uart_write_bytes(UART_NUM_0, (const char *) "<<START>>\n", 10);
     uart_flush(UART_NUM_0);
     pcap_start();
