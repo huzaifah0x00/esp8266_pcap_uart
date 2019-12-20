@@ -95,7 +95,10 @@ try:
         f.flush()
 except KeyboardInterrupt:
     print("[+] Stopping...")
-    os.killpg(os.getpgid(p.pid), signal.SIGTERM)
+    if os.name != 'nt':
+        os.killpg(os.getpgid(p.pid), signal.SIGTERM)
+    else:
+        pass # cuz we never started wireshark 
 
 f.close()
 ser.close()
