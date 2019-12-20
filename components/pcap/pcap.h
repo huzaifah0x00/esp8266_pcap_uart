@@ -45,6 +45,9 @@ typedef enum {
     PCAP_LINK_TYPE_LOCAL_TALK = 114    /*!< LocalTalk */
 } pcap_link_type_t;
 
+extern uint32_t esp_wifi_get_promiscuous_data_len(); 
+extern void esp_wifi_set_promiscuous_data_len(uint32_t len);
+
 /**
  * @brief Create a pcap object
  *
@@ -63,6 +66,7 @@ esp_err_t pcap_start(void);
  * @return esp_err_t ESP_OK on success, ESP_FAIL on IO error
  */
 esp_err_t pcap_capture_packet(void *payload, uint32_t length, uint32_t seconds, uint32_t microseconds);
+
 
 #ifdef __cplusplus
 }
