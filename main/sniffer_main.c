@@ -7,10 +7,13 @@
 #include "driver/uart.h"
 #include "pcap.h"
 
+// #include <inttypes.h>
 void sniffer_handler(void* buff, wifi_promiscuous_pkt_type_t type)
 {
+
     wifi_promiscuous_pkt_t *ppkt = (wifi_promiscuous_pkt_t *)buff;
     uint32_t length = ppkt->rx_ctrl.sig_mode ? ppkt->rx_ctrl.HT_length : ppkt->rx_ctrl.legacy_length;
+    if(type == WIFI_PKT_MGMT) length -= 4;
     uint32_t now = sys_now();
     pcap_capture_packet(ppkt->payload, length, now / 1000000U, now % 1000000U);
 }
@@ -22,6 +25,8 @@ void wifi_init(void)
     
     esp_event_loop_init(NULL, NULL);
     wifi_init_config_t cfg = WIFI_INIT_CONFIG_DEFAULT();
+
+
     esp_wifi_init(&cfg);
     esp_wifi_set_storage(WIFI_STORAGE_RAM);
     esp_wifi_set_mode(WIFI_MODE_STA);
@@ -32,7 +37,14 @@ void wifi_init(void)
     esp_wifi_set_promiscuous_filter(&wifi_filter);
     esp_wifi_set_channel(CONFIG_SNIFFER_CHANNEL, WIFI_SECOND_CHAN_NONE);
     esp_wifi_set_promiscuous_rx_cb(&sniffer_handler);
+    esp_wifi_set_promiscuous_data_len(512);
     esp_wifi_set_promiscuous(true);
+
+    
+    // vTaskDelay( 2500 / portTICK_PERIOD_MS); // sleep 2.5 seconds before starting stream 
+
+    // uint32_t datalen = esp_wifi_get_promiscuous_data_len();
+    // printf("promisc_data_len: %"PRIu32" \n", datalen);
 }
 
 void uart_init(void)
