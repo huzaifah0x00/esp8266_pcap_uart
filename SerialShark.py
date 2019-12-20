@@ -9,9 +9,13 @@ import signal
 import time
 
 try:
-    serialportInput = input("[?] Select a serial port (default '/dev/ttyUSB0'): ")
+    if os.name == 'nt': # check if windows ..
+        serialportInput = input("[?] Select a serial port (default 'COM3'): ")
+    else:
+        serialportInput = input("[?] Select a serial port (default 'COM3'): ")
+        
     if serialportInput == "":
-        serialport = "/dev/ttyUSB0"
+        serialport = "COM3" if (os.name == 'nt') else "/dev/ttyUSB0"
     else:
         serialport = serialportInput
 except KeyboardInterrupt:
@@ -57,9 +61,10 @@ while not canBreak:
     except KeyboardInterrupt:
         print("\n[+] Exiting...")
         exit()
-    except:
+    except Exception as e:
         print("[!] Serial connection failed... Retrying...")
-        time.sleep(2)
+        print(e)
+        time.sleep(1)
         continue
 
 print("[+] Serial connected. Name: " + ser.name)
@@ -74,10 +79,14 @@ while check == 0:
         print("[+] Stream started...")
     #else: print '"'+line+'"'
 
-print("[+] Starting up wireshark...")
-cmd = "tail -f -c +0 " + filename + " | wireshark -k -i -"
-p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-                       shell=True, preexec_fn=os.setsid)
+if os.name == 'nt': # check if windows ..
+    print("[+] NOT Starting up wireshark...")
+else:
+    print("[+] Starting up wireshark...")
+    serialportInput = input("[?] Select a serial port (default 'COM3'): ")
+    cmd = "tail -f -c +0 " + filename + " | wireshark -k -i -"
+    p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+                           shell=True, preexec_fn=os.setsid)
 
 try:
     while True:
