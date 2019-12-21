@@ -83,7 +83,6 @@ if os.name == 'nt': # check if windows ..
     print("[+] NOT Starting up wireshark...")
 else:
     print("[+] Starting up wireshark...")
-    serialportInput = input("[?] Select a serial port (default 'COM3'): ")
     cmd = "tail -f -c +0 " + filename + " | wireshark -k -i -"
     p = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                            shell=True, preexec_fn=os.setsid)
