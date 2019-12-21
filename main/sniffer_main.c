@@ -5,7 +5,7 @@
 #include "lwip/sys.h"
 #include "driver/gpio.h"
 #include "driver/uart.h"
-#include "pcap.h"
+// #include "pcap.h" //tmp disabled until eapol issue solved
 
 // #include <inttypes.h>
 uint16_t offset = 0;
@@ -20,33 +20,49 @@ void sniffer_handler(void* buff, wifi_promiscuous_pkt_type_t type)
     if(type == WIFI_PKT_MGMT) length -= 4; // known bugfix
     // uint32_t now = sys_now(); // tmp disabled
     
-    //check if we have a authentication frame(eapol)   
+    
+    /* 
+    // check if we have a deauth packet 
     if (type == WIFI_PKT_MGMT &&  (ppkt->payload[0] == 0xA0 || 
         ppkt->payload[0] == 0xC0 )) {
         printf("DEAUTH PACKET SEEN\n");
     }
-    if (( (ppkt->payload[30] == 0x88 && ppkt->payload[31] == 0x8e) ||
-        ( ppkt->payload[32] == 0x88 && ppkt->payload[33] == 0x8e) )){
+    */
+
+    // check if we have a authentication frame(eapol)
+
+    //this if came from : https://github.com/G4lile0/ESP32-WiFi-Hash-Monster/blob/0ef6d2403f89b66e89447b31541784cda8ee9b85/ESP32-WiFi-Hash-Monster/ESP32-WiFi-Hash-Monster.ino#L457
+    else if (( (ppkt->payload[30] == 0x88 && ppkt->payload[31] == 0x8e) ||
+                (ppkt->payload[31] == 0x88 && ppkt->payload[32] == 0x8e) || //i see bytes 32-33 for 0x88-0x8e in wireshark
+                ( ppkt->payload[32] == 0x88 && ppkt->payload[33] == 0x8e) 
+                ))
+    {
+     
             gpio_set_level(CONFIG_SNIFFER_LED_GPIO_PIN, led ^= 1);
-            printf("EAPOL PACKET SEEN..\n"); // testing 
+            printf("EAPOL PACKET DETECTED..\n"); // testing 
+            
+            //tmp disabled until eapol issue solved
             // pcap_capture_packet(ppkt->payload, length, now / 1000000U, now % 1000000U);
 
     }
 
-    // for (int i = 0; i < length; i++) {
-    //     if (i % 8 == 0) {
-    //         printf("%06X ", offset);
-    //         offset += 8;
-    //     }
-    //     printf("%02X ", ppkt->payload[i]);
-    //     if (i % 8 == 7) {
-    //         printf("\n");
-    //     }
-    //     else if ((i + 1) == length) {
-    //         printf("\n");
-    //     }
-    // }
-    // offset = 0;
+/*
+    for (int i = 0; i < length; i++) {
+        if (i % 8 == 0) {
+            printf("%06X ", offset);
+            offset += 8;
+        }
+        printf("%02X ", ppkt->payload[i]);
+        if (i % 8 == 7) {
+            printf("\n");
+        }
+        else if ((i + 1) == length) {
+            printf("\n");
+        }
+    }
+    offset = 0;
+*/
+
 }
 
 void wifi_init(void)
@@ -64,11 +80,11 @@ void wifi_init(void)
     esp_wifi_start();
 
     wifi_promiscuous_filter_t wifi_filter;
-    wifi_filter.filter_mask = WIFI_PROMIS_FILTER_MASK_MGMT;
+    wifi_filter.filter_mask = WIFI_PROMIS_FILTER_MASK_ALL;
     esp_wifi_set_promiscuous_filter(&wifi_filter);
     esp_wifi_set_channel(CONFIG_SNIFFER_CHANNEL, WIFI_SECOND_CHAN_NONE);
     esp_wifi_set_promiscuous_rx_cb(&sniffer_handler);
-    esp_wifi_set_promiscuous_data_len(1024);
+    // esp_wifi_set_promiscuous_data_len(1024);
     esp_wifi_set_promiscuous(true);
 
     // uint32_t datalen = esp_wifi_get_promiscuous_data_len(); //this causes a panic form some reason
@@ -103,7 +119,7 @@ void app_main(void)
     vTaskDelay( 2500 / portTICK_PERIOD_MS); // sleep 2.5 seconds before starting stream 
     uart_write_bytes(UART_NUM_0, (const char *) "<<START>>\n", 10);
     uart_flush(UART_NUM_0);
-    pcap_start();
+    // pcap_start(); //tmp disabled until eapol issue solved
 
     //tmp
     gpio_set_level(CONFIG_SNIFFER_LED_GPIO_PIN, led ^= 1);
