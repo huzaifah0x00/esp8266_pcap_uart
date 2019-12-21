@@ -1,7 +1,6 @@
-# ESP8266 PCAP Sniffer - RTOS SDK Version
+# ESP8266 handshake Sniffer - RTOS SDK Version
 
-ESP8266 Sniffer firmware which outputs PCAP data via UART. Use the sniffer to
-stream 802.11 packets from ESP8266 to Wireshark or dump into a PCAP file.
+ESP8266 Sniffer firmware which captures 4way handshakes and saves them to a pcap file on sdcard
 
 ## Overview
 
