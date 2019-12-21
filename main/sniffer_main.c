@@ -5,7 +5,7 @@
 #include "lwip/sys.h"
 #include "driver/gpio.h"
 #include "driver/uart.h"
-// #include "pcap.h" //tmp disabled until eapol issue solved
+// #include "pcap.h" //temporarily disabled until eapol issue solved
 
 // #include <inttypes.h>
 uint16_t offset = 0;
@@ -18,14 +18,14 @@ void sniffer_handler(void* buff, wifi_promiscuous_pkt_type_t type)
     uint32_t length = ppkt->rx_ctrl.sig_mode ? ppkt->rx_ctrl.HT_length : ppkt->rx_ctrl.legacy_length;
     
     if(type == WIFI_PKT_MGMT) length -= 4; // known bugfix
-    // uint32_t now = sys_now(); // tmp disabled
+    // uint32_t now = sys_now(); // temporarily disabled
     
     
     /* 
     // check if we have a deauth packet 
     if (type == WIFI_PKT_MGMT &&  (ppkt->payload[0] == 0xA0 || 
         ppkt->payload[0] == 0xC0 )) {
-        printf("DEAUTH PACKET SEEN\n");
+        printf("DEAUTH PACKET SEEN\n"); 
     }
     */
 
@@ -41,7 +41,7 @@ void sniffer_handler(void* buff, wifi_promiscuous_pkt_type_t type)
             gpio_set_level(CONFIG_SNIFFER_LED_GPIO_PIN, led ^= 1);
             printf("EAPOL PACKET DETECTED..\n"); // testing 
             
-            //tmp disabled until eapol issue solved
+            //temporarily disabled until eapol issue solved
             // pcap_capture_packet(ppkt->payload, length, now / 1000000U, now % 1000000U);
 
     }
@@ -119,7 +119,7 @@ void app_main(void)
     vTaskDelay( 2500 / portTICK_PERIOD_MS); // sleep 2.5 seconds before starting stream 
     uart_write_bytes(UART_NUM_0, (const char *) "<<START>>\n", 10);
     uart_flush(UART_NUM_0);
-    // pcap_start(); //tmp disabled until eapol issue solved
+    // pcap_start(); //temporarily disabled until eapol issue solved
 
     //tmp
     gpio_set_level(CONFIG_SNIFFER_LED_GPIO_PIN, led ^= 1);
@@ -127,7 +127,7 @@ void app_main(void)
 
     while (true) 
     {
-        // gpio_set_level(CONFIG_SNIFFER_LED_GPIO_PIN, led ^= 1); //tmp disabled 
+        // gpio_set_level(CONFIG_SNIFFER_LED_GPIO_PIN, led ^= 1); //temporarily disabled 
         vTaskDelay(CONFIG_SNIFFER_CHANNEL_SWITCH_INTERVAL / portTICK_PERIOD_MS);
 #ifdef CONFIG_SNIFFER_CHANNEL_HOPING
             esp_wifi_set_channel(channel, WIFI_SECOND_CHAN_NONE);
