@@ -1,3 +1,4 @@
+### Archived... Because it can't work on an ESP8266, and I bought an ESP32
 # ESP8266 handshake Sniffer - RTOS SDK Version
 
 ESP8266 Sniffer firmware which captures 4way handshakes and saves them to a pcap file on sdcard
